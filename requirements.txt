@@ -2,3 +2,4 @@ tabulate
 matplotlib
 python-dotenv
 mysql-connector-python
+python-dotenv
