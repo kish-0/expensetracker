@@ -11,9 +11,11 @@ def main():
     dbase = os.getenv("dbname")
     psswd = os.getenv("dbpasswd")
     fig = Figlet(font="small")
+    conn = msc.connect(host="localhost", user=usr, passwd=psswd, database=dbase)
+
+
     print("\n", fig.renderText("Expense Tracker"))
 
-    conn = msc.connect(host="localhost", user=usr, passwd=psswd, database=dbase)
     #if conn.is_connected():
     #    print("Hello, world!")
 
@@ -46,8 +48,6 @@ def get_operation():
             return x
         else:
             print("Please choose existing option")
-
-# NEED TO TEST SEPERATELY 
 
 def get_transaction():
         while True: # Getting amount - making sure a float value is given
@@ -100,6 +100,7 @@ def get_transaction():
                 break
             else:
                 continue
+        
 
 
 main()
