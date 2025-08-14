@@ -10,27 +10,32 @@ def main():
     usr = os.getenv("dbuser")
     dbase = os.getenv("dbname")
     psswd = os.getenv("dbpasswd")
-    fig = Figlet(font="small")
+    global tbl
+    tbl = os.getenv("tbname")
+    global conn
     conn = msc.connect(host="localhost", user=usr, passwd=psswd, database=dbase)
-
-
-    print("\n", fig.renderText("Expense Tracker"))
+    global curs 
+    curs = conn.cursor()
 
     #if conn.is_connected():
     #    print("Hello, world!")
-
-    try:
-        op = get_operation()
-        match op:
-            case "1":
-                get_transaction()
-            case _:
-                print(op)
-    except KeyboardInterrupt:
-        print()
+    while True:
+        try:
+            op = get_operation()
+            match op:
+                case "1":
+                    get_transaction()
+                case _:
+                    print(op)
+        except KeyboardInterrupt:
+            print()
+            break
 
 
 def get_operation():
+    fig = Figlet(font="small")
+    print("\n", fig.renderText("Expense Tracker"))
+
     menu = """
     (1) Add transaction.
     (2) Monthly expenditure table.
@@ -77,7 +82,7 @@ def get_transaction():
                 else:
                     raise ValueError
 
-            except:
+            except ValueError:
                 print("Please adhere to format (YYYY-DD-MM)")
                 continue
         
@@ -100,7 +105,12 @@ def get_transaction():
                 break
             else:
                 continue
-        
-
+        if ans == "y":
+            print("Transaction recorded, returning to main menu..\n\n\n")
+            curs.execute(f"INSERT INTO {tbl} values({a},'{c}','{da}','{desc}')")
+            conn.commit()
+            conn.close()
+        else:
+            print("Cancelled, returning to main menu..\n\n\n")
 
 main()
