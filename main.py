@@ -39,7 +39,7 @@ def get_operation():
 
     menu = """
     (1) Add transaction.
-    (2) Monthly expenditure table.
+    (2) Per Month expenditure table.
     (3) View Transactions.
     (4) Financial analysis graph.
     (5) Consult AI.
