@@ -1,6 +1,7 @@
 import mysql.connector as msc
 from dotenv import load_dotenv
 import os
+import datetime
 from pyfiglet import Figlet
 from tabulate import tabulate
 
@@ -74,16 +75,14 @@ def get_transaction():
             da = input("Enter date of expenditure (YYYY-MM-DD)?\n: ")
             try:
                 dl = da.split("-")
-                y = dl[0]
-                m = dl[1]
-                d = dl[2]
-                if len(y)==4 and len(m)==len(d)==2 and 0<int(m)<13 and 0<int(d)<32 :
-                    break
-                else:
-                    raise ValueError
+                y = int(dl[0])
+                m = int(dl[1])
+                d = int(dl[2])
+                datetime.date(y,m,d) # datetime module's constructor raises ValueError if invalid date is given. We use that to our advantage
+                break
 
             except ValueError:
-                print("Please adhere to format (YYYY-DD-MM)")
+                print("Invalid date, please adhere to format (YYYY-DD-MM)")
                 continue
         
         while True: # Getting short description - making sure its under 50 characters
