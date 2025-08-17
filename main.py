@@ -4,9 +4,6 @@ import os
 import datetime
 from pyfiglet import Figlet
 import sys
-
-
-
 from tabulate import tabulate
 
 
