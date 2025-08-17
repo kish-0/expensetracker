@@ -3,7 +3,9 @@ from dotenv import load_dotenv
 import os
 import datetime
 from pyfiglet import Figlet
+import sys
 from tabulate import tabulate
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -26,6 +28,12 @@ def main():
             match op:
                 case "1":
                     get_transaction()
+                    if not yesorno():
+                        break                        
+                case "2":
+                    view_transaction()
+                    if not yesorno():
+                        break                             
                 case _:
                     print(op)
         except KeyboardInterrupt:
@@ -111,5 +119,68 @@ def get_transaction():
             conn.close()
         else:
             print("Cancelled, returning to main menu..\n\n\n")
+
+def view_transaction():
+    monthsdict = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 12: 'December'}
+    while True:
+        try:
+            _ = input("Please enter month in format (YYYY, MM)\n: ").split(",")
+            year = _[0].strip()
+            month = _[1].strip()
+            __ = int(year)
+            if not (len(year) == 4 and len(month) == 2 and 0<int(month)<13):
+                continue
+            year, month = int(year), int(month)
+            break
+        except KeyboardInterrupt:
+            sys.exit()
+        except:
+            continue
+
+    curs.execute(f"select * from Expense where year(TransactionDate) = {year} and month(TransactionDate) = {month} order by Amount desc")
+    t = curs.fetchall()
+    
+    if not t:
+        print("\nNo transactions found for this month. \n")
+        return
+    
+    table = []
+    tamount = 0
+    percat = {} #Category wise amount storing dictionary
+    for i in t:
+        a,c,d,de = i
+        tamount += a
+        table.append([a,c,d.strftime("%Y-%m-%d"),de])
+
+        if c in percat:
+            percat[c] += a
+        else:
+            percat[c] = a
+
+    table.append([f"TOTAL: {tamount}", "", "", ""])
+    print("\n\n")
+    print(tabulate(table,headers=['Amount', 'Category', 'Date', 'Description'], tablefmt="simple" ))
+    print("\n\n")
+
+
+    #Plotting Pie Chart:
+    categories = percat.keys()
+    amounts = percat.values()
+    plt.pie(amounts, labels=categories, autopct='%1.1f%%', startangle=90)
+    plt.title(f"Monthly Expenses for {monthsdict[month]}-{year}")
+    plt.axis("equal")
+    plt.show()
+ 
+ 
+def yesorno():
+    while True:
+        x = input("\nDo you want to return to main menu?\n: ").strip().lower()
+        if x in ('yes', 'y', 'no', 'n'):
+            if x == 'yes' or x == 'y':
+                return True
+            else:
+                return False
+        else:
+            continue
 
 main()
