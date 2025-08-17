@@ -27,9 +27,12 @@ def main():
             match op:
                 case "1":
                     get_transaction()
-
+                    if not yesorno():
+                        break                        
                 case "2":
                     view_transaction()
+                    if not yesorno():
+                        break                             
                 case _:
                     print(op)
         except KeyboardInterrupt:
@@ -147,5 +150,15 @@ def view_transaction():
     print("\n\n")
     print(tabulate(table,headers=['Amount', 'Category', 'Date', 'Description'], tablefmt="simple" ))
 
+def yesorno():
+    while True:
+        x = input("\nDo you want to return to main menu?\n: ").strip().lower()
+        if x in ('yes', 'y', 'no', 'n'):
+            if x == 'yes' or x == 'y':
+                return True
+            else:
+                return False
+        else:
+            continue
 
 main()
