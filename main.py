@@ -137,15 +137,18 @@ def view_transaction():
 
     curs.execute(f"select * from Expense where year(TransactionDate) = {year} and month(TransactionDate) = {month} order by Amount desc")
     t = curs.fetchall()
+    
+    if not t:
+        print("\nNo transactions found for this month. \n")
+        return
+    
     table = []
     tamount = 0
     for i in t:
-        a = i[0]
-        c = i[1]
-        d = i[2].strftime("%Y-%m-%d")
-        de = i[3]
+        a,c,d,de = i
         tamount += a
-        table.append([a,c,d,de])
+        table.append([a,c,d.strftime("%Y-%m-%d"),de])
+
     table.append([f"TOTAL: {tamount}", "", "", ""])
     print("\n\n")
     print(tabulate(table,headers=['Amount', 'Category', 'Date', 'Description'], tablefmt="simple" ))
