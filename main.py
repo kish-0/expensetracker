@@ -3,6 +3,10 @@ from dotenv import load_dotenv
 import os
 import datetime
 from pyfiglet import Figlet
+import sys
+
+
+
 from tabulate import tabulate
 
 
@@ -26,6 +30,9 @@ def main():
             match op:
                 case "1":
                     get_transaction()
+
+                case "2":
+                    view_transaction()
                 case _:
                     print(op)
         except KeyboardInterrupt:
@@ -111,5 +118,37 @@ def get_transaction():
             conn.close()
         else:
             print("Cancelled, returning to main menu..\n\n\n")
+
+def view_transaction():
+    while True:
+        try:
+            _ = input("Please enter month in format (YYYY, MM)\n: ").split(",")
+            year = _[0].strip()
+            month = _[1].strip()
+            __ = int(year)
+            if not (len(year) == 4 and len(month) == 2 and 0<int(month)<13):
+                continue
+            year, month = int(year), int(month)
+            break
+        except KeyboardInterrupt:
+            sys.exit()
+        except:
+            continue
+
+    curs.execute(f"select * from Expense where year(TransactionDate) = {year} and month(TransactionDate) = {month} order by Amount desc")
+    t = curs.fetchall()
+    table = []
+    tamount = 0
+    for i in t:
+        a = i[0]
+        c = i[1]
+        d = i[2].strftime("%Y-%m-%d")
+        de = i[3]
+        tamount += a
+        table.append([a,c,d,de])
+    table.append([f"TOTAL: {tamount}", "", "", ""])
+    print("\n\n")
+    print(tabulate(table,headers=['Amount', 'Category', 'Date', 'Description'], tablefmt="simple" ))
+
 
 main()
