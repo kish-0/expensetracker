@@ -73,7 +73,8 @@ def get_transaction():
                 continue
 
         while True: # Getting category - making sure that given one is in our list of possible categories
-            categories = "utilities, groceries, transportation, dining, shopping, entertainment, travel, medical, miscellaneous"
+            categories = ["utilities", "groceries", "transportation", "dining", 
+              "shopping", "entertainment", "travel", "medical", "miscellaneous"]
             print("Expenditure category?\n")
             c = input(f"Kindly choose from following categories - {categories} \n: ").strip().lower()
             if c in categories : 
