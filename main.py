@@ -4,6 +4,7 @@ import os
 import datetime
 from pyfiglet import Figlet
 import sys
+import csv
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
@@ -32,6 +33,10 @@ def main():
                         break                        
                 case "2":
                     view_transaction()
+                    if not yesorno():
+                        break
+                case "3":
+                    writetofile()
                     if not yesorno():
                         break                             
                 case _:
@@ -172,7 +177,28 @@ def view_transaction():
     plt.axis("equal")
     plt.show()
  
- 
+def writetofile():
+    of = input("Out file name <.csv> ?\n: ").strip()
+    yn = False
+    while True:
+        x = input(f"\nAll records will be written to {of}.csv [y/n]\n: ").strip().lower()
+        if x in ('yes', 'y', 'no', 'n'):
+            if x == 'yes' or x == 'y':
+                yn = True
+                break
+            else:
+                break
+        else:
+            continue
+    curs.execute(f"select * from {tbl}")
+    data = curs.fetchall()
+    if yn:
+        with open(f"../{of}.csv", "w") as recordsfile:
+            wr = csv.writer(recordsfile)
+            for d in data:
+                wr.writerow(d)
+        print(f"\n\nData written to {of}.csv")
+        
 def yesorno():
     while True:
         x = input("\nDo you want to return to main menu?\n: ").strip().lower()
