@@ -81,7 +81,9 @@ def get_transaction():
             categories = ["utilities", "groceries", "transportation", "dining", 
               "shopping", "entertainment", "travel", "medical", "miscellaneous"]
             print("Expenditure category?\n")
-            c = input(f"Kindly choose from following categories - {categories} \n: ").strip().lower()
+            print("Kindly choose from following categories - ", end="")
+            print(", ".join(categories))
+            c = input(": ").strip().lower()
             if c in categories : 
                 break
         
