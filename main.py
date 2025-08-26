@@ -1,5 +1,6 @@
 import mysql.connector as msc
 from dotenv import load_dotenv
+import pandas as pd
 import os
 import datetime
 from pyfiglet import Figlet
@@ -38,6 +39,10 @@ def main():
                     writetofile()
                     if not yesorno():
                         break                             
+                case "4":
+                    graph()
+                    if not yesorno():
+                        break
                 case "5":
                     ai_chat()
                     if not yesorno():
@@ -51,8 +56,7 @@ def main():
 
 def get_operation():
     fig = Figlet(font="small")
-    print("\n", fig.renderText("Expense Tracker"))
-
+    titl = "\n " + fig.renderText("Expense Tracker")
     menu = """
     (1) Add transaction.
     (2) Per month expenditure table.
@@ -60,12 +64,17 @@ def get_operation():
     (4) Financial analysis graph.
     (5) Consult AI.
     q to exit
+    c to clear terminal
     """
-    print(menu)
+    print(titl, menu, sep='\n\n')
     while True:
         x = input(": ").strip().lower()
-        if x=='q':
+        if x == 'q':
             raise KeyboardInterrupt
+        elif x == 'c':
+            clearscreen()
+            print(titl, menu, sep='\n\n')
+
         elif x in "12345":
             return x
         else:
@@ -93,11 +102,8 @@ def get_transaction():
         while True: # Getting date - making sure its in right formal for sql
             da = input("Enter date of expenditure (YYYY-MM-DD)?\n: ")
             try:
-                dl = da.split("-")
-                y = int(dl[0])
-                m = int(dl[1])
-                d = int(dl[2])
-                datetime.date(y,m,d) # datetime module's constructor raises ValueError if invalid date is given. We use that to our advantage
+                y,m,d = da.split("-")
+                datetime.date(int(y),int(m),int(d)) # datetime module's constructor raises ValueError if invalid date is given. We use that to our advantage
                 break
 
             except ValueError:
@@ -177,6 +183,7 @@ def view_transaction():
     #Plotting Pie Chart:
     categories = percat.keys()
     amounts = percat.values()
+    plt.figure(figsize=(6, 4))
     plt.pie(amounts, labels=categories, autopct='%1.1f%%', startangle=90)
     plt.title(f"Monthly Expenses for {monthsdict[month]}-{year}")
     plt.axis("equal")
@@ -206,7 +213,74 @@ def writetofile():
 
 def ai_chat():
     subprocess.call(['ollama', 'run', 'phi3:mini'])
+
+def graph():
+    while True:
+        i = input("\nEnter date range in format <YYYY-MM-DD to YYYY-MM-DD>\n: ")
+        x = i.split("to")
+        try:
+            for i in x:
+                _ = i.strip()
+                y,m,d = _.split("-")
+                datetime.date(int(y),int(m),int(d))
+                x[x.index(i)] = _
+            break
+        except KeyboardInterrupt:
+            sys.exit()
+        except:
+            continue
+    d1, d2 = x
+    curs.execute(f"select Amount, Category, TransactionDate from Expense where TransactionDate between '{d1}' and '{d2}'")
+    d = curs.fetchall()
+    data=[]
+    for u in d:
+        data.append(u)
     
+    df = pd.DataFrame(data, columns=["Amount", "Category", "Date"])
+
+    colors = {"utilities": "dodgerblue","groceries": "orange","transportation": "green","dining": "red","shopping": "purple","entertainment": "cyan","travel": "magenta","medical": "brown","miscellaneous": "gray"}
+
+    #Line Graph (Expense)
+    daily_totals = df.groupby("Date")["Amount"].sum()
+
+    plt.figure(figsize=(6, 4))
+    plt.plot(daily_totals.index, daily_totals.values, marker="o", color="royalblue", label="Total Spent")
+    plt.title("Total Amount Spent Each Date")
+    plt.xlabel("Date")
+    plt.ylabel("Amount")
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.tight_layout()
+
+
+    #Bar Graph (Category wise expense)
+    category_totals = df.groupby("Category")["Amount"].sum()
+    category_colors = [colors.get(cat, "skyblue") for cat in category_totals.index]
+
+    plt.figure(figsize=(6, 4))
+    plt.bar(category_totals.index, category_totals.values, color=category_colors)
+    plt.title("Total Amount Per Category")
+    plt.xlabel("Category")
+    plt.ylabel("Amount")
+    plt.xticks(rotation=30)
+    plt.tight_layout()
+
+
+    #Line Graph (Cumulative Expense)
+    cumulative_totals = daily_totals.cumsum()
+
+    plt.figure(figsize=(6, 4))
+    plt.plot(cumulative_totals.index, cumulative_totals.values, marker="o", color="darkorange", label="Cumulative Spending")
+    plt.title("Cumulative Spending Over Time")
+    plt.xlabel("Date")
+    plt.ylabel("Cumulative Amount")
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.tight_layout()
+  
+    plt.show()
 def yesorno():
     while True:
         x = input("\nDo you want to return to main menu?\n: ").strip().lower()
@@ -217,5 +291,12 @@ def yesorno():
                 return False
         else:
             continue
+def clearscreen():
+
+    if os.name == 'nt':
+        _ = os.system('cls')
+    else:
+        _ = os.system('clear')
+
 
 main()
