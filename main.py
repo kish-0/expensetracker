@@ -2,14 +2,12 @@ import mysql.connector as msc
 from dotenv import load_dotenv
 import os
 import datetime
-import json
 from pyfiglet import Figlet
 import sys
 import csv
 from tabulate import tabulate
 import matplotlib.pyplot as plt
-import ollama
-
+import subprocess
 def main():
     load_dotenv()
     usr = os.getenv("dbuser")
@@ -206,66 +204,9 @@ def writetofile():
                 wr.writerow(d)
         print(f"\n\nData written to {of}.csv")
 
-def ai_definition():
-    curs.execute(f"select * from {tbl}")
-    d = curs.fetchall()
-    data = []
-    for _ in d:
-        l = list(_)
-        l[2] = l[2].strftime("%Y-%m-%d")
-        data.append(l)
-    finaldata = json.dumps(data, indent=2)
-
-    system = f"""
-    You are FinAssist, an AI specialized ONLY in personal finance and expense tracking. 
-    Your job is to analyze the user's financial records and assist them with:
-    - Tracking daily, weekly, and monthly expenses
-    - Categorizing spending
-    - Budgeting advice
-    - Saving strategies
-    - Detecting unusual spending patterns
-
-    Rules:
-    1. NEVER answer questions outside finance. If asked, politely redirect back to financial topics.
-    2. ALWAYS use the provided expense data when relevant.
-    3. KEEP responses short, clear, and practical.
-    4. When possible, give actionable insights (e.g., "You spent ₹X on food last month, which is Y% of total").
-
-    Here is the user's expense history:
-    {finaldata}
-    """
-    return system
-
 def ai_chat():
-    sysprompt = ai_definition()
-    messages = [
-        {"role": "system", "content": sysprompt}
-    ]
-
-    while True:
-        inp = input("\n>>> ")
-        if inp.lower().strip() in ['exit', 'quit']:
-            break
-
-        messages.append({"role": "user", "content": inp})
-
-        stream = ollama.chat(
-            model="phi3:mini",
-            messages=messages,
-            stream=True
-        )
-
-        full_response = ""
-        for chunk in stream:
-            content = chunk["message"]["content"]
-            print(content, end="", flush=True)
-            full_response += content
-
-        messages.append({"role": "assistant", "content": full_response})
-        print()  # clean newline
-
-
-
+    subprocess.call(['ollama', 'run', 'phi3:mini'])
+    
 def yesorno():
     while True:
         x = input("\nDo you want to return to main menu?\n: ").strip().lower()
