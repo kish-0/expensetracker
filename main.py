@@ -133,7 +133,6 @@ def get_transaction():
             print("Transaction recorded, returning to main menu..\n\n\n")
             curs.execute(f"INSERT INTO {tbl} values({a},'{c}','{da}','{desc}')")
             conn.commit()
-            conn.close()
         else:
             print("Cancelled, returning to main menu..\n\n\n")
 
@@ -154,7 +153,7 @@ def view_transaction():
         except:
             continue
 
-    curs.execute(f"select * from Expense where year(TransactionDate) = {year} and month(TransactionDate) = {month} order by Amount desc")
+    curs.execute(f"select * from {tbl} where year(TransactionDate) = {year} and month(TransactionDate) = {month} order by Amount desc")
     t = curs.fetchall()
     
     if not t:
@@ -230,7 +229,7 @@ def graph():
         except:
             continue
     d1, d2 = x
-    curs.execute(f"select Amount, Category, TransactionDate from Expense where TransactionDate between '{d1}' and '{d2}'")
+    curs.execute(f"select Amount, Category, TransactionDate from {tbl} where TransactionDate between '{d1}' and '{d2}'")
     d = curs.fetchall()
     data=[]
     for u in d:
