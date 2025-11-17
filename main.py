@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
 import mysql.connector as msc
 from dotenv import load_dotenv
 import pandas as pd
@@ -7,7 +10,6 @@ from pyfiglet import Figlet
 import sys
 import csv
 from tabulate import tabulate
-import matplotlib.pyplot as plt
 import subprocess
 def main():
     load_dotenv()
